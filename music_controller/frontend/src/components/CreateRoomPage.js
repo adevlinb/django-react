@@ -15,17 +15,33 @@ import RadioGroup from '@mui/material/RadioGroup';
 export default function CreateRoomPage() {
     let defaultVotes = 2;
     const [formData, setFormData] = useState({
-        guestCanPause: true,
-        votesToSkip: defaultVotes
+        guest_can_pause: true,
+        votes_to_skip: defaultVotes
     });
 
-    function handleFormChange(evt) {
-        evt.preventDefault();
-        setFormData({ ...formData, [evt.target.name]: evt.target.value });
-        console.log(formData, "formData");
+    function handleVotesChange(evt) {
+        setFormData({...formData, votes_to_skip: evt.target.value });
+        console.log(formData, "votes")
+    }
+
+    function handleGuestCanPauseChange(evt) {
+        setFormData({...formData, guest_can_pause: evt.target.value === "true" ? true : false });
+        console.log(formData, "pause")
     }
 
     function handleRoomButtonPressed() {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(formData)
+        }
+        fetch("/api/create-room", requestOptions)
+            .then((response) => response.json())
+            .then((data) => console.log(data))
+
+    }
+
+    function handleBackButtonPressed() {
 
     }
 
@@ -37,17 +53,19 @@ export default function CreateRoomPage() {
             </Grid>
             <Grid item xs={12} align="center">
                 <FormControl component="fieldset">
-                    <FormHelperText>
+                    <FormHelperText component={"div"}>
                         <div align='center'>Guest Control of Playback State</div>
                     </FormHelperText>
-                    <RadioGroup row defaultValue="true" onChange={handleFormChange}>
+                    <RadioGroup row onChange={handleGuestCanPauseChange}>
                         <FormControlLabel
+                            name="guest_can_pause"
                             value="true"
                             control={ <Radio color="primary" />}
                             label="Play/Pause"
                             labelPlacement='bottom'
-                        />
+                            />
                         <FormControlLabel
+                            name="guest_can_pause"
                             value="false"
                             control={ <Radio color="secondary" />}
                             label="No Control"
@@ -58,8 +76,8 @@ export default function CreateRoomPage() {
             </Grid>
             <Grid item xs={12} align="center">
                 <FormControl>
-                    <TextField required={true} type='number' defaultValue={defaultVotes} inputProps={{ min: 1, style: { textAlign: 'center' } }} onChange={handleFormChange} />
-                    <FormHelperText>
+                    <TextField required={true} type='number' value={formData.votes_to_skip} name="votes_to_skip" inputProps={{ min: 1, style: { textAlign: 'center' } }} onChange={handleVotesChange} />
+                    <FormHelperText component={"div"}>
                         <div align='center'>
                             Votes Required to Skip Song
                         </div>
@@ -67,10 +85,10 @@ export default function CreateRoomPage() {
                 </FormControl>
             </Grid>
             <Grid item xs={12} align="center">
-                <Button color='primary' variant='contained'>
+                <Button color='primary' variant='contained' onClick={handleRoomButtonPressed}>
                     Create a room.
                 </Button>
-                <Button color='secondary' variant='contained' to='/' compoonent={Link}>
+                <Button color='secondary' variant='contained' to='/' compoonent={Link} onClick={handleBackButtonPressed}>
                     Back
                 </Button>
             </Grid>
